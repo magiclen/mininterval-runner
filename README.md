@@ -26,6 +26,8 @@ const runner = new MinIntervalRunner(5 * 60 * 1000, task);
 // runner.onAfterWaiting
 // runner.onBeforeExecuting
 // runner.onAfterExecuting
+// runner.onStop
+// runner.onTaskError // if this handler returns `true`, the task will restart immediately instead of waiting for the mininterval.
 
 // Start executing the task
 await runner.start();
