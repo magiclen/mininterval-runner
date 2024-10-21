@@ -1,14 +1,21 @@
 export type Task = (runner: MinIntervalRunner) => void | Promise<void>;
 export type Listener = Task | null;
-export type WaitListener = ((duration: number, runner: MinIntervalRunner) => void | Promise<void>) | null;
-export type ErrorListener = ((error: unknown, runner: MinIntervalRunner) => boolean | undefined | Promise<boolean | undefined>) | null;
+export type WaitListener =
+    | ((duration: number, runner: MinIntervalRunner) => void | Promise<void>)
+    | null;
+export type ErrorListener =
+    | ((
+        error: unknown,
+        runner: MinIntervalRunner,
+    ) => boolean | undefined | Promise<boolean | undefined>)
+    | null;
 
 /**
  * A utility function to pause execution for a specified number of milliseconds.
  */
-export const sleep = (milliseconds: number) => {
-    return new Promise((resolve) => setTimeout(resolve, milliseconds));
-};
+export const sleep = (milliseconds: number): Promise<void> => new Promise((resolve) => {
+    setTimeout(resolve, milliseconds);
+});
 
 /**
  * A class representing a runner that executes a task repeatedly with minimum interval control.
@@ -19,21 +26,21 @@ export class MinIntervalRunner {
     private _isStopping = false;
 
     // Listeners for different stages of task execution
-    public onStart: Listener = null;
-    public onBeforeWaiting: WaitListener = null;
-    public onAfterWaiting: Listener = null;
-    public onBeforeExecuting: Listener = null;
-    public onAfterExecuting: Listener = null;
+    onStart: Listener = null;
+    onBeforeWaiting: WaitListener = null;
+    onAfterWaiting: Listener = null;
+    onBeforeExecuting: Listener = null;
+    onAfterExecuting: Listener = null;
     /**
      * If this handler returns `true`, the task will restart immediately instead of waiting for the mininterval.
      */
-    public onTaskError: ErrorListener = null;
-    public onStop: Listener = null;
+    onTaskError: ErrorListener = null;
+    onStop: Listener = null;
 
     /**
      * Constructs a new MinIntervalRunner instance with the specified interval and task.
      */
-    constructor(interval: number, public readonly task: Task) {
+    constructor(interval: number, readonly task: Task) {
         this.interval = interval;
     }
 
@@ -69,7 +76,7 @@ export class MinIntervalRunner {
         return this._isRunning;
     }
 
-    private async runListener(listener: Listener) {
+    private async runListener(listener: Listener): Promise<void> {
         if (listener !== null) {
             try {
                 await listener(this);
@@ -79,7 +86,7 @@ export class MinIntervalRunner {
         }
     }
 
-    private async runWaitListener(listener: WaitListener, duration: number) {
+    private async runWaitListener(listener: WaitListener, duration: number): Promise<void> {
         if (listener !== null) {
             try {
                 await listener(duration, this);
@@ -89,7 +96,10 @@ export class MinIntervalRunner {
         }
     }
 
-    private async runErrorListener(listener: ErrorListener, error: unknown): Promise<boolean | undefined> {
+    private async runErrorListener(
+        listener: ErrorListener,
+        error: unknown,
+    ): Promise<boolean | undefined> {
         if (listener !== null) {
             return await listener(error, this);
         }
@@ -98,7 +108,7 @@ export class MinIntervalRunner {
     /**
      * Starts the runner, causing it to begin executing the task repeatedly.
      */
-    async start() {
+    async start(): Promise<void> {
         if (this._isRunning) {
             return;
         }
@@ -146,7 +156,11 @@ export class MinIntervalRunner {
                             break;
                         }
                     } catch (error) {
-                        const immediatelyRun = await this.runErrorListener(this.onTaskError, error) === true;
+                        const immediatelyRun
+                            = await this.runErrorListener(
+                                this.onTaskError,
+                                error,
+                            ) === true;
 
                         if (this.stopIfStopping()) {
                             break;
@@ -177,7 +191,7 @@ export class MinIntervalRunner {
     /**
      * Stops the runner, causing it to cease execution of the task.
      */
-    stop() {
+    stop(): void {
         if (this._isRunning) {
             this._isStopping = true;
         }

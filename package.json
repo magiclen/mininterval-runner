@@ -1,6 +1,6 @@
 {
     "name": "mininterval-runner",
-    "version": "0.1.1",
+    "version": "0.2.0",
     "description": "Repeated execution with minimum interval control.",
     "type": "module",
     "exports": "./lib/lib.js",
@@ -9,7 +9,7 @@
         "lib"
     ],
     "engines": {
-        "node": ">=16"
+        "node": ">=20"
     },
     "scripts": {
         "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testTimeout 30000",
@@ -41,15 +41,18 @@
     },
     "homepage": "https://magiclen.org/mininterval-runner/",
     "devDependencies": {
-        "@types/jest": "^29.5.11",
-        "@typescript-eslint/eslint-plugin": "^6.19.1",
-        "@typescript-eslint/parser": "^6.19.1",
-        "eslint": "^8.56.0",
-        "eslint-import-resolver-typescript": "^3.6.1",
-        "eslint-plugin-import": "^2.29.1",
+        "@eslint/js": "^9.13.0",
+        "@stylistic/eslint-plugin": "^2.9.0",
+        "@types/eslint__js": "^8.42.3",
+        "@types/jest": "^29.5.13",
+        "eslint": "^9.13.0",
+        "eslint-import-resolver-typescript": "^3.6.3",
+        "eslint-plugin-import": "^2.31.0",
+        "globals": "^15.11.0",
         "jest": "^29.7.0",
-        "rimraf": "^5.0.5",
-        "ts-jest": "^29.1.2",
-        "typescript": "^5.3.3"
+        "rimraf": "^6.0.1",
+        "ts-jest": "^29.2.5",
+        "typescript": "~5.5.4",
+        "typescript-eslint": "^8.10.0"
     }
 }
