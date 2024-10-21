@@ -1,6 +1,6 @@
 {
     "name": "mininterval-runner",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "Repeated execution with minimum interval control.",
     "type": "module",
     "exports": "./lib/lib.js",
