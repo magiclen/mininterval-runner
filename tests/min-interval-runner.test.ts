@@ -164,4 +164,22 @@ describe("MinIntervalRunner", () => {
         assert.equal(runner.isRunning, false);
         assert.ok(performance.now() - startTime < 1000);
     });
+
+    it("lets timers run when the task does not need to wait", async () => {
+        // If timers cannot run, the runner stops itself here, so that this test does not hang.
+        const maxCount = 1_000_000;
+        let counter = 0;
+
+        const runner = new MinIntervalRunner(0, (r) => {
+            counter += 1;
+
+            if (counter === maxCount) {
+                r.stop();
+            }
+        });
+
+        await runner.start(AbortSignal.timeout(50));
+
+        assert.ok(counter < maxCount);
+    });
 });
