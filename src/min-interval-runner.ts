@@ -1,4 +1,4 @@
-import { setTimeout as sleep } from "node:timers/promises";
+import { setImmediate, setTimeout as sleep } from "node:timers/promises";
 
 /** The max delay (in milliseconds) which timers can accept. */
 const MAX_INTERVAL = 2 ** 31 - 1;
@@ -231,5 +231,8 @@ export class MinIntervalRunner {
         this.#lastExecutionTime = retry ? undefined : executionTime;
 
         await callSafely(() => this.onAfterExecuting?.(this));
+
+        // Let timers and I/O run, even if the next execution does not need to wait.
+        await setImmediate();
     }
 }
