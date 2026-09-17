@@ -1,6 +1,6 @@
 {
     "name": "mininterval-runner",
-    "version": "0.2.1",
+    "version": "0.3.0",
     "private": false,
     "description": "Repeated execution with minimum interval control.",
     "keywords": [
