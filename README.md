@@ -5,8 +5,6 @@ mininterval-runner
 
 Repeated execution with minimum interval control. Useful for running crawlers.
 
-Requires Node.js 24 or later.
-
 ## Usage
 
 ```typescript
