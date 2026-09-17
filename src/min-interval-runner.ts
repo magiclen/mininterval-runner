@@ -5,25 +5,22 @@ export type WaitListener =
     | null;
 export type ErrorListener =
     | ((
-        error: unknown,
-        runner: MinIntervalRunner,
-    ) => boolean | undefined | Promise<boolean | undefined>)
+          error: unknown,
+          runner: MinIntervalRunner,
+      ) => boolean | undefined | Promise<boolean | undefined>)
     | null;
 
-/**
- * A utility function to pause execution for a specified number of milliseconds.
- */
-export const sleep = (milliseconds: number): Promise<void> => new Promise((resolve) => {
-    setTimeout(resolve, milliseconds);
-});
+/** A utility function to pause execution for a specified number of milliseconds. */
+export const sleep = (milliseconds: number): Promise<void> =>
+    new Promise((resolve) => {
+        setTimeout(resolve, milliseconds);
+    });
 
-/**
- * A class representing a runner that executes a task repeatedly with minimum interval control.
- */
+/** A class representing a runner that executes a task repeatedly with minimum interval control. */
 export class MinIntervalRunner {
-    private _interval!: number;
-    private _isRunning = false;
-    private _isStopping = false;
+    #interval = 0;
+    #isRunning = false;
+    #isStopping = false;
 
     // Listeners for different stages of task execution
     onStart: Listener = null;
@@ -32,48 +29,42 @@ export class MinIntervalRunner {
     onBeforeExecuting: Listener = null;
     onAfterExecuting: Listener = null;
     /**
-     * If this handler returns `true`, the task will restart immediately instead of waiting for the mininterval.
+     * If this handler returns `true`, the task will restart immediately instead of waiting for the
+     * mininterval.
      */
     onTaskError: ErrorListener = null;
     onStop: Listener = null;
 
-    /**
-     * Constructs a new MinIntervalRunner instance with the specified interval and task.
-     */
-    constructor(interval: number, readonly task: Task) {
+    /** Constructs a new MinIntervalRunner instance with the specified interval and task. */
+    constructor(
+        interval: number,
+        readonly task: Task,
+    ) {
         this.interval = interval;
     }
 
-    /**
-     * Sets the minimum interval between each execution of the task.
-     */
+    /** Sets the minimum interval between each execution of the task. */
     set interval(interval: number) {
         if (interval < 0) {
             throw new RangeError("`interval` cannot be negative");
         }
 
-        this._interval = interval;
+        this.#interval = interval;
     }
 
-    /**
-     * Gets the minimum interval (in milliseconds) between each execution of the task.
-     */
+    /** Gets the minimum interval (in milliseconds) between each execution of the task. */
     get interval(): number {
-        return this.interval;
+        return this.#interval;
     }
 
-    /**
-     * Gets a value indicating whether the runner is currently running.
-     */
+    /** Gets a value indicating whether the runner is currently running. */
     get isRunning(): boolean {
-        return this._isRunning;
+        return this.#isRunning;
     }
 
-    /**
-     * Gets a value indicating whether the runner is currently stopping.
-     */
+    /** Gets a value indicating whether the runner is currently stopping. */
     get isStopping(): boolean {
-        return this._isRunning;
+        return this.#isRunning;
     }
 
     private async runListener(listener: Listener): Promise<void> {
@@ -103,29 +94,28 @@ export class MinIntervalRunner {
         if (listener !== null) {
             return await listener(error, this);
         }
+
+        return undefined;
     }
 
-    /**
-     * Starts the runner, causing it to begin executing the task repeatedly.
-     */
+    /** Starts the runner, causing it to begin executing the task repeatedly. */
     async start(): Promise<void> {
-        if (this._isRunning) {
+        if (this.#isRunning) {
             return;
         }
 
-        this._isRunning = true;
+        this.#isRunning = true;
 
         await this.runListener(this.onStart);
 
         if (!this.stopIfStopping()) {
             let lastExecutionTime = 0;
 
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            while (this._isRunning) {
+            while (this.#isRunning) {
                 const executionTime = Date.now() - lastExecutionTime;
 
-                if (executionTime < this._interval) {
-                    const duration = this._interval - executionTime;
+                if (executionTime < this.#interval) {
+                    const duration = this.#interval - executionTime;
 
                     await this.runWaitListener(this.onBeforeWaiting, duration);
 
@@ -156,11 +146,8 @@ export class MinIntervalRunner {
                             break;
                         }
                     } catch (error) {
-                        const immediatelyRun
-                            = await this.runErrorListener(
-                                this.onTaskError,
-                                error,
-                            ) === true;
+                        const immediatelyRun =
+                            (await this.runErrorListener(this.onTaskError, error)) === true;
 
                         if (this.stopIfStopping()) {
                             break;
@@ -181,26 +168,24 @@ export class MinIntervalRunner {
                 }
             }
 
-            this._isRunning = false;
-            this._isStopping = false;
+            this.#isRunning = false;
+            this.#isStopping = false;
         }
 
         await this.runListener(this.onStop);
     }
 
-    /**
-     * Stops the runner, causing it to cease execution of the task.
-     */
+    /** Stops the runner, causing it to cease execution of the task. */
     stop(): void {
-        if (this._isRunning) {
-            this._isStopping = true;
+        if (this.#isRunning) {
+            this.#isStopping = true;
         }
     }
 
     private stopIfStopping(): boolean {
-        if (this._isStopping) {
-            this._isStopping = false;
-            this._isRunning = false;
+        if (this.#isStopping) {
+            this.#isStopping = false;
+            this.#isRunning = false;
 
             return true;
         }

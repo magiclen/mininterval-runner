@@ -8,11 +8,10 @@ Repeated execution with minimum interval control. Useful for running crawlers.
 ## Usage
 
 ```typescript
-import { MinIntervalRunner } from 'mininterval-runner';
+import { MinIntervalRunner } from "mininterval-runner";
 
 const task = async (runner) => {
     // do something
-
     // Stop executing the task when needed
     // runner.stop();
 };
